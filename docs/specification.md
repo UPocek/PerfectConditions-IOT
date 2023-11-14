@@ -18,6 +18,9 @@ Nakon što smo prepoznali sortu biljke znamo i koji su idealni uslovi potrebni b
 - Senzor pritiska -> Česte promene u pritisku mogu da poremeti mir i spokoj biljke zato naš sistem obaveštava vlasnika ukoliko dođe do bilo kakvog poremeđaja
 - Zvuci -> Opšte je poznato da biljke vole muziku, mada je retko da iko ima vremena da svaki dan priča i peva svojoj biljci zato naš sistem radi i to. Sa specijlanom opcijom uspavanka za "Twinkle, Twinkle, Little Plant"
 
+## Arhitektura sistema
+Logika aplikacije i mesto gde pristižu sva očitavanja će biti iskucana u Java Spring Boot radnom okviru, dok će se perzistencija podataka vršiti u TimeSeries bazi podataka InfluxDB. Nakon što mikrokontroler u predefinisanom trenutku očita trenutne vrednosti svojih senzora šalje ih na back putem MQTT protokola gde se vrši čuvanje podataka i najnovije vrednosti se prikazuju korisniku putem IOS ili Android mobilne aplikacije koja će biti iskucana u Flutter radnom okviru, Dart programski jezik.
+
 ## Tim
 - [Tamara Ilić](https://www.linkedin.com/in/tamara-ili%C4%87-ab9958257/)
 - [Uroš Poček](https://www.linkedin.com/in/uros-pocek/)

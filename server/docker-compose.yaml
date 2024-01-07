@@ -1,0 +1,51 @@
+version: '3'
+name: iot-server
+
+services:
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    ports:
+      - "8087:8086"
+    environment:
+      - INFLUXDB_DB=influx
+      - INFLUXDB_ADMIN_USER=admin
+      - INFLUXDB_ADMIN_PASSWORD=adminadmin
+    volumes:
+      - inflexdb_data:/var/lib/influxdb2:rw
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - '3002:3000'
+    volumes:
+      - grafana:/var/lib/grafana
+    depends_on:
+      - influxdb
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=adminadmin
+
+  postgres_db:
+    image: postgres:16.0-alpine3.18
+    container_name: main_db
+    volumes:
+      - postgres_iot:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=devdb
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=changeme
+    ports:
+      - "5431:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U devuser -d devdb" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  inflexdb_data:
+  grafana:
+  postgres_iot:

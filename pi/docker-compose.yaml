@@ -1,0 +1,16 @@
+version: '3'
+name: iot
+
+services:
+    mosquitto:
+        container_name: mosquitto
+        hostname: mosquitto
+        restart: unless-stopped
+        image: eclipse-mosquitto
+        ports:
+            - "1883:1883"
+            - "9001:9001"
+        volumes: 
+            - ./mosquitto/config:/mosquitto/config:rw
+            - ./mosquitto/data:/mosquitto/data:rw
+            - ./mosquitto/log:/mosquitto/log:rw

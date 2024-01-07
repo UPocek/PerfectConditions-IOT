@@ -21,6 +21,15 @@ Nakon što smo prepoznali sortu biljke znamo i koji su idealni uslovi potrebni b
 ## Arhitektura sistema
 Logika aplikacije i mesto gde pristižu sva očitavanja će biti iskucana u Java Spring Boot radnom okviru, dok će se perzistencija podataka vršiti u TimeSeries bazi podataka InfluxDB. Nakon što mikrokontroler u predefinisanom trenutku očita trenutne vrednosti svojih senzora šalje ih na back putem MQTT protokola gde se vrši čuvanje podataka i najnovije vrednosti se prikazuju korisniku putem IOS ili Android mobilne aplikacije koja će biti iskucana u Flutter radnom okviru, Dart programski jezik.
 
+## Resursi i zaključci
+
+### Intenzitet svetlosti
+200-500 LUX: Low light intensity. This is almost deep-shade. Not appropriate for most plants.
+500-1,000 LUX: Still low light intensity but bright enough to read. It resembles natural light of an ordinary room. This light intensity is appropriate for shade-loving plants.
+1,000 - 2,000 LUX: Bright but indirect sunlight. This may produce a defined shadow. Appropriate for plants that require indirect sunlight.
+2,000 - 4,000 LUX: This light intensity is about 40% of midday sun as well as direct light coming through windows. This is considered bright light. It is ideal for many plants that require good and consistent light intensity.
+4,000 - 5,000 LUX: This light intensity is about 50% of midday sun. This is strong direct sunlight in a bright room. Appropriate for plants that require a lot of strong light.
+
 ## Tim
 - [Tamara Ilić](https://www.linkedin.com/in/tamara-ili%C4%87-ab9958257/)
 - [Uroš Poček](https://www.linkedin.com/in/uros-pocek/)

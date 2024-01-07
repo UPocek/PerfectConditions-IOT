@@ -16,10 +16,12 @@ Nakon što smo prepoznali sortu biljke znamo i koji su idealni uslovi potrebni b
 - Senzor intenziteta svetlosti -> Kako neke biljke preferiraju više, odnosno manje svetla, ova funkcionalnost pomaže vlasniku da pronađe idealno mesto u domu za svoju bilju
 - Senzor temperature i vlažnosti vazduha -> Postavite vašu bilju na previše hladno ili previše toplo mesto i ☠️(gecrk) zato naš sistem daje vlasniku uvid kada se spoljašnji uslovi promene da je potrebno da premesti biljku na toplije/hladnije mesto
 - Barometar -> Česte promene u pritisku mogu da poremeti mir i spokoj biljke zato naš sistem obaveštava vlasnika ukoliko dođe do bilo kakvog poremeđaja
-- Zvuci -> Opšte je poznato da biljke vole muziku, mada je retko da iko ima vremena da svaki dan priča i peva svojoj biljci zato naš sistem radi i to. Sa specijlanom opcijom uspavanka za "Twinkle, Twinkle, Little Plant"
+- Zvučnik -> Opšte je poznato da biljke vole muziku, mada je retko da iko ima vremena da svaki dan priča i peva svojoj biljci zato naš sistem radi i to. Sa specijlanom opcijom uspavanka za "Twinkle, Twinkle, Little Plant"
 
 ## Arhitektura sistema
-Logika aplikacije i mesto gde pristižu sva očitavanja će biti iskucana u Java Spring Boot radnom okviru, dok će se perzistencija podataka vršiti u TimeSeries bazi podataka InfluxDB. Nakon što mikrokontroler u predefinisanom trenutku očita trenutne vrednosti svojih senzora šalje ih na back putem MQTT protokola gde se vrši čuvanje podataka i najnovije vrednosti se prikazuju korisniku putem IOS ili Android mobilne aplikacije koja će biti iskucana u Flutter radnom okviru, Dart programski jezik.
+Logika aplikacije i mesto gde pristižu sva očitavanja će biti iskucana u Java Spring Boot radnom okviru, dok će se perzistencija podataka vršiti u TimeSeries bazi podataka InfluxDB. Nakon što mikrokontroler u predefinisanom trenutku očita trenutne vrednosti svojih senzora šalje ih putem MQTT protokola na SBC RaspberryPI koji sakuplja te podatke i prosleđuje ih na back gde se vrši čuvanje podataka i najnovije vrednosti se prikazuju korisniku putem IOS ili Android mobilne aplikacije. Mobilna aplikacija će biti iskucana u Flutter radnom okviru, Dart programski jezik.
+
+Povezivanje uređaja će biti odrađeno na sledeći način: RaspberryPI će biti centralni uređaj sistema i uređaj koji će vršiti pametnu komunikaciju sa aplikativnim serverom preko interneta. Detektor vlažnosti zemljišta, Senzor intenziteta svetlosti, Senzor temperature i vlažnosti vazduha, Barometar i Zvučnik će biti povezani na ESP32 i Arduino koji će preko MQTT protokola slati očitavanja na RaspberryPI u istoj lokalnoj mreži.
 
 ## Resursi i zaključci
 

@@ -1,0 +1,16 @@
+paho-mqtt==1.6.1
+certifi @ file:///private/tmp/python-certifi-20231008-5561-13s00fm/certifi-2023.7.22
+cffi @ file:///private/tmp/cffi-20231014-5567-1hyue8f/cffi-1.16.0
+cryptography @ file:///private/tmp/python-cryptography-20231024-6375-1k9sys9/cryptography-41.0.5
+influxdb-client==1.39.0
+packaging @ file:///private/tmp/python-packaging-20231018-5368-zv724j/packaging-23.2
+paho-mqtt==1.6.1
+pycparser @ file:///private/tmp/pycparser-20231013-5787-1anpge2/pycparser-2.21
+Pygments @ file:///private/tmp/pygments-20231008-5534-zuvwpt/Pygments-2.16.1
+python-dateutil==2.8.2
+pytz @ file:///private/tmp/python-pytz-20231024-5403-w4fpxw/pytz-2023.3.post1
+PyYAML @ file:///private/tmp/pyyaml-20231018-5610-1rdh755/PyYAML-6.0.1
+reactivex==4.0.4
+six==1.16.0
+typing_extensions @ file:///private/tmp/python-typing-extensions-20231008-5501-1ralzsu/typing_extensions-4.8.0
+urllib3==2.1.0

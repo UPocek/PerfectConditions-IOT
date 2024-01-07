@@ -23,6 +23,15 @@ Logika aplikacije i mesto gde pristižu sva očitavanja će biti iskucana u Java
 
 Povezivanje uređaja će biti odrađeno na sledeći način: RaspberryPI će biti centralni uređaj sistema i uređaj koji će vršiti pametnu komunikaciju sa aplikativnim serverom preko interneta. Detektor vlažnosti zemljišta, Senzor intenziteta svetlosti, Senzor temperature i vlažnosti vazduha, Barometar i Zvučnik će biti povezani na ESP32 i Arduino koji će preko MQTT protokola slati očitavanja na RaspberryPI u istoj lokalnoj mreži.
 
+## Resursi i zaključci
+
+### Intenzitet svetlosti
+200-500 LUX: Low light intensity. This is almost deep-shade. Not appropriate for most plants.
+500-1,000 LUX: Still low light intensity but bright enough to read. It resembles natural light of an ordinary room. This light intensity is appropriate for shade-loving plants.
+1,000 - 2,000 LUX: Bright but indirect sunlight. This may produce a defined shadow. Appropriate for plants that require indirect sunlight.
+2,000 - 4,000 LUX: This light intensity is about 40% of midday sun as well as direct light coming through windows. This is considered bright light. It is ideal for many plants that require good and consistent light intensity.
+4,000 - 5,000 LUX: This light intensity is about 50% of midday sun. This is strong direct sunlight in a bright room. Appropriate for plants that require a lot of strong light.
+
 ## Tim
 - [Tamara Ilić](https://www.linkedin.com/in/tamara-ili%C4%87-ab9958257/)
 - [Uroš Poček](https://www.linkedin.com/in/uros-pocek/)

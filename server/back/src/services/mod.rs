@@ -33,8 +33,7 @@ fn get_influxdb_client() -> Client {
     let host = env::var("INFLUXDB_HOST").expect("INFLUXDB_HOST must be set");
     let org = env::var("INFLUXDB_ORG").expect("INFLUXDB_ORG must be set");
     let token = env::var("INFLUXDB_TOKEN").expect("INFLUXDB_TOKEN must be set");
-    let client = Client::new(host, org, token);
-    client
+    Client::new(host, org, token)
 }
 
 #[get("/all_types_basic")]
@@ -354,5 +353,6 @@ pub async fn get_reading_history(
         status: "fail".to_string(),
         message: format!("History unavaliable"),
     };
+
     return Err(Custom(Status::UnprocessableEntity, Json(error_response)));
 }

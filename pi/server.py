@@ -3,6 +3,8 @@ from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 import sys
 import json
+from datetime import datetime, timedelta
+from song import play
 
 def on_message_received(client, userdata, message):
     try:
@@ -48,6 +50,11 @@ def get_influxdb_client():
 if __name__ == "__main__":
     bucket = "iot-server"
     org = "iot-server"
+
+    # now = datetime.now() + timedelta(hours=1)
+    # current_time = now.strftime("%H:%M:%S")
+    # print("Current Time =", current_time)
+    # play()
 
     client = connect_mqtt()
     influxdb_client = get_influxdb_client()

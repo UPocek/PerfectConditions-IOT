@@ -240,7 +240,7 @@ pub fn echo_channel(ws: ws::WebSocket) -> ws::Channel<'static> {
 
     ws.channel(move |mut stream: ws::stream::DuplexStream| {
         Box::pin(async move {
-            let mut interval = interval(Duration::from_secs(10));
+            let mut interval = interval(Duration::from_secs(1));
 
             tokio::spawn(async move {
                 loop {

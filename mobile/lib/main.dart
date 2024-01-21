@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 void main() {
   runApp(MyApp());
@@ -34,22 +35,35 @@ class Plant {
   String plant_name = '';
   String plant_type_id = '';
   String plant_type_name = '';
-  double light_intesity_need = 0;
+  double light_intensity_need = 0;
   int? soil_moisture_need = 0;
   double? temperature_need = 0;
   double? humidity_need = 0;
   double? pressure_need = 0;
+  double current_heat_index = 0;
+  double? current_humidity = 0;
+  double? current_lux = 0;
+  double? current_moisture = 0;
+  double? current_pressure = 0;
+  double? current_temperature = 0;
   Plant(this.plant_type_id, this.plant_name);
   Plant.received(
-      this.plant_id,
-      this.plant_name,
-      this.plant_type_id,
-      this.plant_type_name,
-      this.light_intesity_need,
-      this.humidity_need,
-      this.pressure_need,
-      this.soil_moisture_need,
-      this.temperature_need);
+    this.plant_id,
+    this.plant_name,
+    this.plant_type_id,
+    this.plant_type_name,
+    this.light_intensity_need,
+    this.humidity_need,
+    this.pressure_need,
+    this.soil_moisture_need,
+    this.temperature_need,
+    this.current_heat_index,
+    this.current_humidity,
+    this.current_lux,
+    this.current_moisture,
+    this.current_pressure,
+    this.current_temperature,
+  );
 
   factory Plant.fromJson(Map<String, dynamic> json) {
     return switch (json) {
@@ -58,65 +72,129 @@ class Plant {
         'plant_name': String plant_name,
         'plant_type_id': String plant_type_id,
         'plant_type_name': String plant_type_name,
-        'light_intesity_need': double light_intesity_need,
-        'humidity_need': double humidity_need,
-        'pressure_need': double pressure_need,
+        'light_intensity_need': double light_intensity_need,
         'soil_moisture_need': int soil_moisture_need,
         'temperature_need': double temperature_need,
+        'humidity_need': double humidity_need,
+        'pressure_need': double pressure_need,
+        'current_heat_index': double current_heat_index,
+        'current_humidity': double current_humidity,
+        'current_lux': double current_lux,
+        'current_moisture': double current_moisture,
+        'current_pressure': double current_pressure,
+        'current_temperature': double current_temperature,
       } =>
         Plant.received(
             plant_id,
             plant_name,
             plant_type_id,
             plant_type_name,
-            light_intesity_need,
+            light_intensity_need,
             humidity_need,
             pressure_need,
             soil_moisture_need,
-            temperature_need),
+            temperature_need,
+            current_heat_index,
+            current_humidity,
+            current_lux,
+            current_moisture,
+            current_pressure,
+            current_temperature),
+      _ => throw const FormatException('Failed to load plants.'),
+    };
+  }
+
+  Map<String, dynamic> toJson() => {
+        'plant_type_id': plant_type_id,
+        'plant_name': plant_name,
+      };
+}
+
+class PlantType {
+  String id;
+  String type_name;
+  PlantType(this.id, this.type_name);
+
+  factory PlantType.fromJson(Map<dynamic, dynamic> json) {
+    return switch (json) {
+      {
+        'type_id': String id,
+        'type_name': String type_name,
+      } =>
+        PlantType(
+          id,
+          type_name,
+        ),
       _ => throw const FormatException('Failed to load plants.'),
     };
   }
 }
 
-Future<List<Plant>> fetchPlants() async {
-  final response = await http
-      .get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1'));
+Future<dynamic> fetchPlants() async {
+  final response =
+      await http.get(Uri.parse('http://127.0.0.1:8000/api/all_plants'));
 
   if (response.statusCode == 200) {
-    return jsonDecode(response.body)
-        .map((data) => Plant.fromJson(data as Map<String, dynamic>));
+    return jsonDecode(response.body);
+  } else {
+    throw Exception('Failed to load plants');
+  }
+}
+
+Future<dynamic> fetchPlantTypes() async {
+  final response =
+      await http.get(Uri.parse('http://127.0.0.1:8000/api/all_types_basic'));
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  } else {
+    throw Exception('Failed to load plants');
+  }
+}
+
+Future<dynamic> fetchHistory(
+    String readingName, String period, int precision) async {
+  final response = await http.get(Uri.parse(
+      'http://127.0.0.1:8000/api/history/${readingName}/${period}/${precision.toString()}'));
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
   } else {
     throw Exception('Failed to load plants');
   }
 }
 
 class MyAppState extends ChangeNotifier {
-  var plants = <Plant>[
-    Plant('1', 'Taska'),
-    Plant('2', 'Lula'),
-    Plant('3', 'Tula'),
-    Plant('4', 'Taska'),
-    Plant('5', 'Lula'),
-  ];
-  var typesOfPlants = {
-    '1': 'yucca',
-    '2': 'cactus',
-    '3': 'succulent',
-    '4': 'bonsai',
-    '5': 'palm'
-  };
+  var plants = <Plant>[];
+  var typesOfPlants = [];
 
   Plant? selectedPlant;
 
-  void setPlants(List<Plant>? plants) {
-    plants = plants;
-    notifyListeners();
+  void setPlants() async {
+    var temp = await fetchPlants();
+    plants = temp
+        .map<Plant>((data) => Plant.fromJson(data as Map<String, dynamic>))
+        .toList();
   }
 
-  void addPlant(String name, String id) {
-    plants.add(Plant(id, name));
-    notifyListeners();
+  void setTypes() async {
+    var temp = await fetchPlantTypes();
+    typesOfPlants = temp
+        .map<PlantType>(
+            (data) => PlantType.fromJson(data as Map<dynamic, dynamic>))
+        .toList();
+  }
+
+  Future<void> addPlant(String name, String id) async {
+    final response = await http.post(
+        Uri.parse('http://127.0.0.1:8000/api/new_plant'),
+        body: json.encode(Plant(id, name)));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load plants');
+    }
   }
 
   void selectPlant(Plant plant) {
@@ -132,6 +210,15 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<MyAppState>().setPlants();
+      context.read<MyAppState>().setTypes();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -228,8 +315,7 @@ class PlantCards extends StatelessWidget {
     return FutureBuilder(
         future: fetchPlants(),
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            appState.setPlants(snapshot.data);
+          if (snapshot.hasData || appState.plants.length != null) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -309,7 +395,7 @@ class PlantCard extends StatelessWidget {
                   ),
                   image: DecorationImage(
                       image: Image.asset(
-                        "images/${appState.typesOfPlants[plant.plant_type_id]}.jpeg",
+                        "images/${plant.plant_type_name.toLowerCase()}.jpeg",
                       ).image,
                       fit: BoxFit.cover),
                 ),
@@ -330,15 +416,197 @@ class PlantCard extends StatelessWidget {
   }
 }
 
-class StatsPage extends StatelessWidget {
+class DataPoint {
+  double value;
+  String time;
+  DataPoint(this.value, this.time);
+
+  factory DataPoint.fromJson(Map<dynamic, dynamic> json) {
+    return switch (json) {
+      {
+        'value': double value,
+        'time': String time,
+      } =>
+        DataPoint(
+          value,
+          time,
+        ),
+      _ => throw const FormatException('Failed to load data.'),
+    };
+  }
+}
+
+class StatsPage extends StatefulWidget {
+  @override
+  State<StatsPage> createState() => _StatsPageState();
+}
+
+class _StatsPageState extends State<StatsPage> {
+  var luxPoints = <DataPoint>[];
+  var moisturePoints = <DataPoint>[];
+  var temperaturePoints = <DataPoint>[];
+  var humidityPoints = <DataPoint>[];
+  var pressurePoints = <DataPoint>[];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setDataPoints();
+    });
+  }
+
+  void setDataPoints() async {
+    var temp1 = await fetchHistory('lux', '30d', 6000);
+    var temp2 = await fetchHistory('moisture', '30d', 6000);
+    var temp3 = await fetchHistory('temperature', '30d', 6000);
+    var temp4 = await fetchHistory('humidity', '30d', 6000);
+    var temp5 = await fetchHistory('pressure', '30d', 6000);
+
+    setState(() {
+      luxPoints = temp1
+          .map<DataPoint>(
+              (data) => DataPoint.fromJson(data as Map<String, dynamic>))
+          .toList();
+    });
+    setState(() {
+      moisturePoints = temp2
+          .map<DataPoint>(
+              (data) => DataPoint.fromJson(data as Map<String, dynamic>))
+          .toList();
+    });
+    setState(() {
+      temperaturePoints = temp3
+          .map<DataPoint>(
+              (data) => DataPoint.fromJson(data as Map<String, dynamic>))
+          .toList();
+    });
+    setState(() {
+      humidityPoints = temp4
+          .map<DataPoint>(
+              (data) => DataPoint.fromJson(data as Map<String, dynamic>))
+          .toList();
+    });
+    setState(() {
+      pressurePoints = temp5
+          .map<DataPoint>(
+              (data) => DataPoint.fromJson(data as Map<String, dynamic>))
+          .toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
     var appState = context.watch<MyAppState>();
 
-    return Center(
-      child: Text("Stats"),
-    );
+    return Scaffold(
+        body: luxPoints != []
+            ? SingleChildScrollView(
+                child: Container(
+                    child: Column(
+                children: [
+                  SizedBox(
+                      child: SfCartesianChart(
+                          palette: const <Color>[
+                            Color.fromRGBO(226, 167, 16, 1)
+                          ],
+                          title: ChartTitle(text: "Lux history"),
+                          // Initialize category axis
+                          primaryXAxis: CategoryAxis(),
+                          primaryYAxis: NumericAxis(maximum: 2000),
+                          legend: Legend(isVisible: true),
+                          series: <LineSeries<DataPoint, String>>[
+                            LineSeries<DataPoint, String>(
+                                // Bind data source
+                                dataSource: luxPoints,
+                                dataLabelSettings:
+                                    DataLabelSettings(isVisible: true),
+                                xValueMapper: (DataPoint point, _) =>
+                                    point.time.split('T')[0],
+                                yValueMapper: (DataPoint point, _) =>
+                                    point.value)
+                          ])),
+                  SizedBox(
+                      child: SfCartesianChart(
+                          title: ChartTitle(text: "Moisture history"),
+                          // Initialize category axis
+                          primaryXAxis: CategoryAxis(),
+                          primaryYAxis: NumericAxis(maximum: 100),
+                          legend: Legend(isVisible: true),
+                          series: <LineSeries<DataPoint, String>>[
+                        LineSeries<DataPoint, String>(
+                            // Bind data source
+                            dataSource: moisturePoints,
+                            dataLabelSettings:
+                                DataLabelSettings(isVisible: true),
+                            xValueMapper: (DataPoint point, _) =>
+                                point.time.split('T')[0],
+                            yValueMapper: (DataPoint point, _) => point.value)
+                      ])),
+                  SizedBox(
+                      child: SfCartesianChart(
+                          title: ChartTitle(text: "Temperature history"),
+                          palette: const <Color>[
+                            Color.fromRGBO(226, 16, 222, 1)
+                          ],
+                          primaryXAxis: CategoryAxis(),
+                          primaryYAxis: NumericAxis(maximum: 40),
+                          legend: Legend(isVisible: true),
+                          series: <LineSeries<DataPoint, String>>[
+                            LineSeries<DataPoint, String>(
+                                // Bind data source
+                                dataSource: temperaturePoints,
+                                dataLabelSettings:
+                                    DataLabelSettings(isVisible: true),
+                                xValueMapper: (DataPoint point, _) =>
+                                    point.time.split('T')[0],
+                                yValueMapper: (DataPoint point, _) =>
+                                    point.value)
+                          ])),
+                  SizedBox(
+                      child: SfCartesianChart(
+                          title: ChartTitle(text: "Humidity history"),
+                          palette: const <Color>[
+                            Color.fromRGBO(51, 226, 16, 1)
+                          ],
+                          primaryXAxis: CategoryAxis(),
+                          primaryYAxis: NumericAxis(maximum: 100),
+                          legend: Legend(isVisible: true),
+                          series: <LineSeries<DataPoint, String>>[
+                            LineSeries<DataPoint, String>(
+                                // Bind data source
+                                dataSource: humidityPoints,
+                                dataLabelSettings:
+                                    DataLabelSettings(isVisible: true),
+                                xValueMapper: (DataPoint point, _) =>
+                                    point.time.split('T')[0],
+                                yValueMapper: (DataPoint point, _) =>
+                                    point.value)
+                          ])),
+                  SizedBox(
+                      child: SfCartesianChart(
+                          title: ChartTitle(text: "Pressure history"),
+                          palette: const <Color>[
+                            Color.fromRGBO(226, 16, 76, 1)
+                          ],
+                          primaryXAxis: CategoryAxis(),
+                          primaryYAxis: NumericAxis(maximum: 1100),
+                          legend: Legend(isVisible: true),
+                          series: <LineSeries<DataPoint, String>>[
+                            LineSeries<DataPoint, String>(
+                                // Bind data source
+                                dataSource: pressurePoints,
+                                dataLabelSettings:
+                                    DataLabelSettings(isVisible: true),
+                                xValueMapper: (DataPoint point, _) =>
+                                    point.time.split('T')[0],
+                                yValueMapper: (DataPoint point, _) =>
+                                    point.value)
+                          ])),
+                ],
+              )))
+            : const Center(child: CircularProgressIndicator()));
   }
 }
 
@@ -382,22 +650,22 @@ class _CreatePlantPageState extends State<CreatePlantPage> {
                         fontWeight: FontWeight.normal, fontSize: 24),
                   ),
                 ),
-                DropdownMenu(
+                DropdownMenu<PlantType>(
                   controller: plantTypeController,
                   expandedInsets: EdgeInsets.all(0),
                   requestFocusOnTap: true,
                   label: const Text('Maintenance'),
-                  onSelected: (String? type) {
+                  onSelected: (PlantType? type) {
                     setState(() {
-                      selectedType = type;
-                      print(type);
+                      selectedType = type?.id;
                     });
                   },
-                  dropdownMenuEntries: appState.typesOfPlants.keys
-                      .map<DropdownMenuEntry<String>>((String k) {
-                    return DropdownMenuEntry(
-                      value: k,
-                      label: appState.typesOfPlants[k]!,
+                  dropdownMenuEntries: appState.typesOfPlants
+                      .toList()
+                      .map<DropdownMenuEntry<PlantType>>((type) {
+                    return DropdownMenuEntry<PlantType>(
+                      value: type,
+                      label: type.type_name,
                       enabled: true,
                     );
                   }).toList(),
@@ -482,7 +750,7 @@ class PlantPreviewPage extends StatefulWidget {
 class _PlantPreviewPageState extends State<PlantPreviewPage> {
   final TextEditingController _controller = TextEditingController();
   final _channel = WebSocketChannel.connect(
-    Uri.parse('wss://echo.websocket.events'),
+    Uri.parse('ws://127.0.0.1:8000/ws'),
   );
 
   @override
@@ -490,74 +758,84 @@ class _PlantPreviewPageState extends State<PlantPreviewPage> {
     var appState = context.watch<MyAppState>();
     var theme = Theme.of(context);
     return StreamBuilder(
-      stream: _channel.stream,
-      builder: (context, snapshot) {
-        // appState.selectPlant(snapshot as Plant);
-        return Scaffold(
-          backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-          appBar: AppBar(),
-          body: SafeArea(
-            child: Padding(
-              padding: EdgeInsets.all(30),
-              child: Column(
-                children: [
-                  PlantNotifications(),
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      height: 150,
-                      margin: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(16),
-                        ),
-                        image: DecorationImage(
-                            image: Image.asset(
-                              "images/${appState.typesOfPlants[appState.selectedPlant?.plant_type_id]}.jpeg",
-                            ).image,
-                            fit: BoxFit.fitHeight),
+        stream: _channel.stream,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Scaffold(
+              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+              appBar: AppBar(),
+              body: SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.all(30),
+                  child: Column(
+                    children: [
+                      PlantNotifications(
+                        data: jsonDecode(snapshot.data),
+                        plant: appState.selectedPlant!,
                       ),
-                    ),
+                      Expanded(
+                        flex: 2,
+                        child: Container(
+                          height: 250,
+                          margin: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(16),
+                            ),
+                            image: DecorationImage(
+                                image: Image.asset(
+                                  "images/${appState.selectedPlant?.plant_type_name.toLowerCase()}.jpeg",
+                                ).image,
+                                fit: BoxFit.fitHeight),
+                          ),
+                        ),
+                      ),
+                      DataInputs(
+                          label: "Name",
+                          inputValue: appState.selectedPlant!.plant_name),
+                      DataInputs(
+                          label: "Type",
+                          inputValue: appState.selectedPlant!.plant_type_name),
+                      DataInputs(
+                          label: "Light Intesity",
+                          inputValue: snapshot.hasData
+                              ? jsonDecode(snapshot.data)['lux'].toString()
+                              : appState.selectedPlant!.light_intensity_need
+                                  .toString()),
+                      DataInputs(
+                          label: "Soil Moisture",
+                          inputValue: snapshot.hasData
+                              ? jsonDecode(snapshot.data)['moisture'].toString()
+                              : appState.selectedPlant!.soil_moisture_need
+                                  .toString()),
+                      DataInputs(
+                          label: "Temperature",
+                          inputValue: snapshot.hasData
+                              ? jsonDecode(snapshot.data)['temperature']
+                                  .toString()
+                              : appState.selectedPlant!.temperature_need
+                                  .toString()),
+                      DataInputs(
+                          label: "Humidity",
+                          inputValue: snapshot.hasData
+                              ? jsonDecode(snapshot.data)['humidity'].toString()
+                              : appState.selectedPlant!.humidity_need
+                                  .toString()),
+                      DataInputs(
+                          label: "Pressure",
+                          inputValue: snapshot.hasData
+                              ? jsonDecode(snapshot.data)['pressure'].toString()
+                              : appState.selectedPlant!.pressure_need
+                                  .toString()),
+                    ],
                   ),
-                  DataInputs(
-                      label: "Name",
-                      inputValue: appState.selectedPlant!.plant_name),
-                  DataInputs(
-                      label: "Type",
-                      inputValue: appState.selectedPlant!.plant_type_name),
-                  DataInputs(
-                      label: "Light Intesity",
-                      inputValue: appState.selectedPlant!.light_intesity_need
-                          .toString()),
-                  DataInputs(
-                      label: "Soil Moisture",
-                      inputValue: appState.selectedPlant!.soil_moisture_need
-                          .toString()),
-                  DataInputs(
-                      label: "Temperature",
-                      inputValue:
-                          appState.selectedPlant!.temperature_need.toString()),
-                  DataInputs(
-                      label: "Humidity",
-                      inputValue:
-                          appState.selectedPlant!.humidity_need.toString()),
-                  DataInputs(
-                      label: "Pressure",
-                      inputValue: appState.selectedPlant!.soil_moisture_need
-                          .toString()),
-                ],
+                ),
               ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _sendMessage() {
-    if (_controller.text.isNotEmpty) {
-      _channel.sink.add(_controller.text);
-    }
+            );
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        });
   }
 
   @override
@@ -613,12 +891,84 @@ class DataInputs extends StatelessWidget {
 }
 
 class PlantNotifications extends StatefulWidget {
+  const PlantNotifications({
+    super.key,
+    required this.data,
+    required this.plant,
+  });
+  final Map<String, dynamic> data;
+  final Plant plant;
+
   @override
   State<StatefulWidget> createState() => _PlantNotifications();
 }
 
 class _PlantNotifications extends State<PlantNotifications> {
-  var notifications = <String>["Decrease temp"];
+  var notifications = {};
+  var disabled = [];
+
+  void setNotifications() {
+    var newNotifications = {};
+    if (!disabled.contains("humidity") &&
+        widget.plant.humidity_need! > widget.data['humidity']) {
+      newNotifications['humidity'] =
+          "Lower humidity. Suggested rate is at ${widget.plant.humidity_need}";
+    }
+    if (!disabled.contains("humidity") &&
+        widget.plant.humidity_need! < widget.data['humidity']) {
+      newNotifications['humidity'] =
+          "Raise humidity. Suggested rate is at ${widget.plant.humidity_need}";
+    }
+
+    if (!disabled.contains("lux") &&
+        widget.plant.light_intensity_need > widget.data['lux']) {
+      newNotifications['lux'] =
+          "Lower light intensity. Suggested rate is at ${widget.plant.light_intensity_need}";
+    }
+    if (!disabled.contains("lux") &&
+        widget.plant.light_intensity_need < widget.data['lux']) {
+      newNotifications['lux'] =
+          "Raise light intensity. Suggested rate is at ${widget.plant.light_intensity_need}";
+    }
+
+    if (!disabled.contains("pressure") &&
+        widget.plant.pressure_need! > widget.data['pressure']) {
+      newNotifications['pressure'] =
+          "Lower pressure. Suggested rate is at ${widget.plant.pressure_need}";
+    }
+    if (!disabled.contains("pressure") &&
+        widget.plant.pressure_need! < widget.data['pressure']) {
+      newNotifications['pressure'] =
+          "Raise pressure. Suggested rate is at ${widget.plant.pressure_need}";
+    }
+
+    if (!disabled.contains("moisture") &&
+        widget.plant.soil_moisture_need! > widget.data['moisture']) {
+      newNotifications['moisture'] =
+          "Lower moisture. Suggested rate is at ${widget.plant.soil_moisture_need}";
+    }
+    if (!disabled.contains("moisture") &&
+        widget.plant.soil_moisture_need! < widget.data['moisture']) {
+      newNotifications['moisture'] =
+          "Raise moisture. Suggested rate is at ${widget.plant.soil_moisture_need}";
+    }
+
+    if (!disabled.contains("temperature") &&
+        widget.plant.temperature_need! > widget.data['temperature']) {
+      newNotifications['temperature'] =
+          "Lower temperature. Suggested rate is at ${widget.plant.temperature_need}";
+    }
+    if (!disabled.contains("temperature") &&
+        widget.plant.temperature_need! < widget.data['temperature']) {
+      newNotifications['temperature'] =
+          "Raise temperature. Suggested rate is at ${widget.plant.temperature_need}";
+    }
+
+    setState(() {
+      notifications = newNotifications;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
@@ -627,6 +977,7 @@ class _PlantNotifications extends State<PlantNotifications> {
         fontSize: 24,
         fontWeight: FontWeight.bold);
 
+    setNotifications();
     return Column(
       children: [
         Padding(
@@ -635,7 +986,7 @@ class _PlantNotifications extends State<PlantNotifications> {
               "Take care of:",
               style: styleLabel,
             )),
-        for (var not in notifications)
+        for (var k in notifications.keys)
           ListTile(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(5),
@@ -645,12 +996,12 @@ class _PlantNotifications extends State<PlantNotifications> {
               icon: Icon(Icons.check),
               onPressed: () {
                 setState(() {
-                  notifications.remove(not);
+                  disabled.add(k);
                 });
               },
             ),
             title: Text(
-              not,
+              notifications[k],
             ),
           ),
       ],
